@@ -1,0 +1,4 @@
+@EndUserText.label: 'Service Def for Sales ORder MOdel'
+define service ZDMO_GKG_SO_SD {
+  expose ZC_DMO_GKG_SALES_ANA;
+}

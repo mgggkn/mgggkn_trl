@@ -1,0 +1,29 @@
+projection implementation in class zbp_dmo_gkg_travel_processor unique;
+//strict ( 2 );
+
+define behavior for ZDMO_GKG_TRAVEL_PROCESSOR alias Travel
+{
+  use create;
+  use update;
+  use delete;
+// why use? Go to root BDEF already we have create, update and delete, so use them.
+  use association _Booking { create; }
+}
+
+define behavior for ZDMO_GKG_BOOKING_PROCESSOR alias Booking
+{
+  use update;
+  use delete;
+
+  use association _Travel;
+  use association _BookingSuppl { create; }
+}
+
+define behavior for ZDMO_GKG_BOOKINGSUP_PROCESSOR alias BookingSupplement
+{
+  use update;
+  use delete;
+
+  use association _Travel;
+  use association _Booking;
+}

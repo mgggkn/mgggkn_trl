@@ -1,0 +1,4 @@
+@EndUserText.label: 'Sales Rank Service Definition'
+define service ZDMO_GKG_SALESRANK_SD {
+  expose ZC_DMO_GKG_SALES_RANK as SalesRank;
+}

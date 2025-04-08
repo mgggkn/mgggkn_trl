@@ -1,0 +1,6 @@
+@EndUserText.label: 'Carrier Service Definition'
+define service ZDMO_GKG_CARRIER_SD_V2 {
+  expose ZDMO_GKG_CARRIER_PROCESSOR as Carrier;
+  expose /DMO/I_Connection          as Connection;
+  expose /DMO/I_Flight              as Flight;
+}

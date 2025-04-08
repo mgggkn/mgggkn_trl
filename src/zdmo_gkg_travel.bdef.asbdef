@@ -1,0 +1,116 @@
+//This is managed Scenrio so it's in the 1st line
+managed implementation in class zbp_dmo_gkg_travel unique;
+//This is the class where you have empty implementation for Authorization
+
+// The Strict mode version 2, SAP has 2 two strict modes like version 1 and 2, here 2 is specified.
+strict ( 2 );
+
+//Define the Behavior for Root Entity
+define behavior for ZDMO_GKG_TRAVEL alias Travel //Give Alias NAme
+
+//Telling RAP Framework to insert in to this DB Table for TRavel REquest
+persistent table /dmo/travel_m
+
+// it controls locking of data is managed. HOw the RAP handles Lock?
+// if a travel request is locked the other uses can't edit children like its Booking and Booking Supplement (This is execlusie Lock), This exclusive Lock will not allow the users to open the read mode,
+//This is Optimistic Lock means allow all developers to parallely change the data. by default Optmistic Lock.
+lock master
+
+//This is controlling the permissions and Security settings for our BO like who can do Create, edit, Update, delete ...
+//2 types of Authorization 1. Instance Level 2.Gloabl level.
+//Instance Level --> do you like to give permission to each entry (Each Travel Request)
+//Gloabl Level --> Do you like to controll permission at global level
+//When you have this authorization master then tyou have implement the code. This is mandatory.
+//so you can comment this line but if you comment you can't use strict mode 2 so you need to comment the strict Mode as well.
+authorization master ( instance )
+
+//Concurrency Control works on time. When data was queried it was 10 AM but when data was modified the data 10:05 and confirmed.
+// RAP Framework will take care of Concurrency as a developer you don;t need to take care.
+// ChangedAT is a time stamp which is eTag
+etag master LastChangedAt // Always give Time stamp field here.  you need to choose the time stamp field.
+{
+//These are the Operations whcih RAP will generate the code automatically for you and you don;t need to develop because this is
+//managed scenario
+  create;
+  update;
+  delete;
+  // You can't change the ID of travel as this is only read only
+  //field ( readonly ) TravelId; // you can comment this line otherwsie travel field will be displayed as greay out and you can' enter TRavel ID.
+  //field ( readonly ) TravelId;
+  // Composition , A booking can be created only with TRavel Request, You can't create Booking without TRavel request, This is
+  // the reason it's top.
+  association _Booking { create; }
+//Why this mapping? In the Travel Root entity we have given alais name for all columns, however alias names are best practices recommended by SAP
+// so below section we are mapping each right column from table to alias name
+  mapping for /dmo/travel_m{
+    TravelId = travel_id;
+    AgencyId = agency_id;
+   CustomerId  = customer_id;
+   BeginDate  = begin_date;
+   EndDate = end_date;
+   BookingFee = booking_fee;
+   TotalPrice = total_price;
+    CurrencyCode =   currency_code;
+    Description = description;
+    OverallStatus = overall_status;
+    CreatedBy  = created_by;
+    CreatedAt = created_at;
+    LastChangedBy = last_changed_by;
+    LastChangedAt = last_changed_at;
+
+  }
+}
+
+define behavior for ZDMO_GKG_BOOKING alias Booking //Give Alias NAme
+//Telling RAP Framework to insert in to this DB Table for Booking
+persistent table /dmo/booking_m
+lock dependent by _Travel
+authorization dependent by _Travel
+etag master LastChangedAt
+{
+  update;
+  delete;
+  field ( readonly ) TravelId;
+  //field ( readonly ) BookingId;
+  association _Travel;
+  association _BookingSuppl { create; }
+  mapping for /dmo/booking_m {
+
+        TravelId = travel_id;
+     BookingId =  booking_id;
+    BookingDate = booking_date;
+    CustomerId  = customer_id;
+    CarrierId = carrier_id;
+    ConnectionId = connection_id;
+    FlightDate = flight_date;
+    FlightPrice = flight_price;
+   CurrencyCode = currency_code;
+    BookingStatus = booking_status;
+   LastChangedAt =  last_changed_at;
+  }
+}
+
+define behavior for ZDMO_GKG_BOOKINGSUPPL alias BookingSupplement //Give Alias NAme
+//Telling RAP Framework to insert in to this DB Table for Booking  Supplement
+persistent table /dmo/booksuppl_m
+lock dependent by _Travel
+authorization dependent by _Travel
+//etag master LastChangedAt
+{
+  update;
+  delete;
+  field ( readonly ) TravelId;
+  field ( readonly ) BookingId;
+ // field ( readonly ) BookingSupplementId;
+  association _Travel;
+  association _Booking;
+
+  mapping for /dmo/booksuppl_m {
+    TravelId =  travel_id;
+    BookingId = booking_id;
+    BookingSupplementId = booking_supplement_id;
+    SupplementId = supplement_id;
+    Price = price;
+    CurrencyCode = currency_code;
+  }
+}
